@@ -13,11 +13,11 @@
 
 ## 🚀 About Me
 
-I'm a developer passionate about building tools that solve real problems — from **post-quantum cryptography** to **AI-powered automation**. I love diving deep into complex systems and emerging with elegant solutions.
+I'm a developer passionate about building tools that solve real problems from **post-quantum cryptography** to **AI-powered automation**. I love diving deep into complex systems and emerging with elegant solutions.
 
 - 🔬 Currently exploring **post-quantum cryptography** & **quantum key distribution**
 - 🛠️ Building tools that help students and researchers alike
-- 💡 I believe in **learning by building** — most of my projects are born from necessity
+- 💡 I believe in **learning by building** most of my projects are born from necessity
 
 ---
 
@@ -61,7 +61,7 @@ Automate personalized cold emails to professors for research internships using A
 <tr>
 <td colspan="2">
 
-### 📚 [Corollary](https://github.com/Keykyrios/Corollary) — *Built in a week!*
+### 📚 [Corollary](https://github.com/Keykyrios/Corollary) *Built in a week!*
 **Academic Resource Platform** | [🔗 Live Demo](https://corollary.vercel.app)
 
 A centralized platform for my branch at NIT Warangal to keep academic resources organized and accessible.
