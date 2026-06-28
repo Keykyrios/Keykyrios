@@ -1,0 +1,1084 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+<foreignObject width="800" height="600">
+<div xmlns="http://www.w3.org/1999/xhtml">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Creepster&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ── HIDE ALL RADIO/CHECKBOX INPUTS ── */
+  input[type="radio"],
+  input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0; height: 0;
+  }
+
+  .game {
+    width: 800px;
+    height: 600px;
+    background: #000;
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    overflow: hidden;
+    position: relative;
+    color: #c8c8c8;
+    user-select: none;
+  }
+
+  /* ── ALL SCENES HIDDEN BY DEFAULT ── */
+  .scene {
+    display: none;
+    position: absolute;
+    inset: 0;
+    width: 800px;
+    height: 600px;
+  }
+
+  /* ── SCENE REVEAL VIA RADIO :checked ── */
+  #s-boot:checked   ~ .game .scene-boot,
+  #s-hall:checked   ~ .game .scene-hall,
+  #s-door:checked   ~ .game .scene-door,
+  #s-server:checked ~ .game .scene-server,
+  #s-mirror:checked ~ .game .scene-mirror,
+  #s-void:checked   ~ .game .scene-void,
+  #s-end:checked    ~ .game .scene-end {
+    display: block;
+  }
+
+  /* ═══════════════════════════════════════
+     BOOT SCREEN
+  ═══════════════════════════════════════ */
+  .scene-boot {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+  }
+  .boot-terminal {
+    width: 680px;
+    padding: 40px;
+    border: 1px solid #1a1a1a;
+  }
+  .boot-line {
+    font-size: 12px;
+    color: #2a6e2a;
+    line-height: 1.9;
+    letter-spacing: 0.05em;
+  }
+  .boot-line.dim { color: #1a401a; }
+  .boot-line.warn { color: #6e6e2a; }
+  .boot-line.err  { color: #6e2a2a; }
+  .boot-line.bright { color: #4aad4a; }
+  .boot-title {
+    font-size: 22px;
+    color: #3dcc3d;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+  .boot-sub {
+    font-size: 10px;
+    color: #1f4f1f;
+    text-align: center;
+    margin-top: 28px;
+    letter-spacing: 0.15em;
+  }
+  .boot-divider {
+    border: none;
+    border-top: 1px solid #1a2a1a;
+    margin: 20px 0;
+  }
+  .btn-start {
+    display: block;
+    margin: 36px auto 0;
+    background: none;
+    border: 1px solid #3dcc3d;
+    color: #3dcc3d;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    padding: 12px 40px;
+    cursor: pointer;
+    text-transform: uppercase;
+    text-align: center;
+    width: fit-content;
+    transition: background 0.2s, color 0.2s;
+  }
+  .btn-start:hover { background: #3dcc3d; color: #000; }
+
+  /* ═══════════════════════════════════════
+     SHARED SCENE SHELL
+  ═══════════════════════════════════════ */
+  .scene-shell {
+    background: #050505;
+    width: 800px;
+    height: 600px;
+    position: relative;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 36px;
+    background: #080808;
+    border-bottom: 1px solid #111;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+  }
+  .topbar-id {
+    font-size: 10px;
+    color: #2a4a2a;
+    letter-spacing: 0.15em;
+  }
+  .topbar-loc {
+    font-size: 10px;
+    color: #3d8c3d;
+    letter-spacing: 0.1em;
+    margin-left: auto;
+  }
+  .topbar-integrity {
+    font-size: 10px;
+    color: #5a3a1a;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── VIEWPORT (the 3D rendered area) ── */
+  .viewport {
+    position: absolute;
+    top: 36px;
+    left: 0;
+    right: 0;
+    height: 320px;
+    background: #000;
+    overflow: hidden;
+    border-bottom: 1px solid #0d0d0d;
+  }
+
+  /* ── 3D CORRIDOR BASE ── */
+  .corridor {
+    position: absolute;
+    inset: 0;
+    perspective: 500px;
+    perspective-origin: 50% 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .corridor-inner {
+    position: relative;
+    width: 800px;
+    height: 320px;
+    transform-style: preserve-3d;
+  }
+
+  /* floor */
+  .c-floor {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 160px;
+    background: linear-gradient(to bottom, #0a0a0a 0%, #060606 100%);
+    transform: rotateX(70deg);
+    transform-origin: bottom center;
+  }
+  /* ceiling */
+  .c-ceil {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 160px;
+    background: linear-gradient(to top, #090909 0%, #040404 100%);
+    transform: rotateX(-70deg);
+    transform-origin: top center;
+  }
+  /* left wall */
+  .c-left {
+    position: absolute;
+    top: 0; left: 0;
+    width: 200px; height: 100%;
+    background: linear-gradient(to right, #000 0%, #0c0c0c 100%);
+    transform: rotateY(55deg);
+    transform-origin: left center;
+  }
+  /* right wall */
+  .c-right {
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 100%;
+    background: linear-gradient(to left, #000 0%, #0c0c0c 100%);
+    transform: rotateY(-55deg);
+    transform-origin: right center;
+  }
+  /* vanishing center */
+  .c-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateZ(-200px);
+    width: 60px;
+    height: 60px;
+    background: #030303;
+    border: 1px solid #0a0a0a;
+  }
+  /* grid lines on floor */
+  .c-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to bottom, transparent 49%, #0f0f0f 49%, #0f0f0f 51%, transparent 51%),
+      linear-gradient(to right, transparent 49%, #0a0a0a 49%, #0a0a0a 51%, transparent 51%);
+    background-size: 100px 60px;
+    opacity: 0.4;
+  }
+
+  /* ── SCENE-SPECIFIC CORRIDOR COLOURS ── */
+
+  /* HALL — sickly amber flicker */
+  .scene-hall .c-floor  { background: linear-gradient(to bottom, #0c0900 0%, #070600 100%); }
+  .scene-hall .c-ceil   { background: linear-gradient(to top, #0a0800 0%, #050400 100%); }
+  .scene-hall .c-left   { background: linear-gradient(to right, #000 0%, #0d0a00 100%); }
+  .scene-hall .c-right  { background: linear-gradient(to left, #000 0%, #0d0a00 100%); }
+  .scene-hall .c-center { background: #050400; border-color: #1a1400; }
+  .scene-hall .c-grid   { background-image:
+    linear-gradient(to bottom, transparent 49%, #1a1200 49%, #1a1200 51%, transparent 51%),
+    linear-gradient(to right, transparent 49%, #110e00 49%, #110e00 51%, transparent 51%);
+  }
+
+  /* SERVER — cold blue */
+  .scene-server .c-floor  { background: linear-gradient(to bottom, #000b0d 0%, #000608 100%); }
+  .scene-server .c-ceil   { background: linear-gradient(to top, #000a0c 0%, #000407 100%); }
+  .scene-server .c-left   { background: linear-gradient(to right, #000 0%, #000d10 100%); }
+  .scene-server .c-right  { background: linear-gradient(to left, #000 0%, #000d10 100%); }
+  .scene-server .c-center { background: #000508; border-color: #001a20; }
+  .scene-server .c-grid   { background-image:
+    linear-gradient(to bottom, transparent 49%, #001a20 49%, #001a20 51%, transparent 51%),
+    linear-gradient(to right, transparent 49%, #001015 49%, #001015 51%, transparent 51%);
+  }
+
+  /* MIRROR — red tint */
+  .scene-mirror .c-floor { background: linear-gradient(to bottom, #0d0000 0%, #070000 100%); }
+  .scene-mirror .c-ceil  { background: linear-gradient(to top, #0b0000 0%, #050000 100%); }
+  .scene-mirror .c-left  { background: linear-gradient(to right, #000 0%, #100000 100%); }
+  .scene-mirror .c-right { background: linear-gradient(to left, #000 0%, #100000 100%); }
+  .scene-mirror .c-center{ background: #060000; border-color: #200000; }
+  .scene-mirror .c-grid  { background-image:
+    linear-gradient(to bottom, transparent 49%, #200000 49%, #200000 51%, transparent 51%),
+    linear-gradient(to right, transparent 49%, #150000 49%, #150000 51%, transparent 51%);
+  }
+
+  /* VOID — pure black with violet trace */
+  .scene-void .c-floor  { background: linear-gradient(to bottom, #06000d 0%, #030007 100%); }
+  .scene-void .c-ceil   { background: linear-gradient(to top, #05000b 0%, #020006 100%); }
+  .scene-void .c-left   { background: linear-gradient(to right, #000 0%, #080010 100%); }
+  .scene-void .c-right  { background: linear-gradient(to left, #000 0%, #080010 100%); }
+  .scene-void .c-center { background: #030008; border-color: #180030; }
+  .scene-void .c-grid   { background-image:
+    linear-gradient(to bottom, transparent 49%, #180030 49%, #180030 51%, transparent 51%),
+    linear-gradient(to right, transparent 49%, #10001e 49%, #10001e 51%, transparent 51%);
+  }
+
+  /* DOOR — same as hall */
+  .scene-door .c-floor  { background: linear-gradient(to bottom, #0c0900 0%, #070600 100%); }
+  .scene-door .c-ceil   { background: linear-gradient(to top, #0a0800 0%, #050400 100%); }
+  .scene-door .c-left   { background: linear-gradient(to right, #000 0%, #0d0a00 100%); }
+  .scene-door .c-right  { background: linear-gradient(to left, #000 0%, #0d0a00 100%); }
+  .scene-door .c-center { background: #050400; border-color: #1a1400; }
+  .scene-door .c-grid   { background-image:
+    linear-gradient(to bottom, transparent 49%, #1a1200 49%, #1a1200 51%, transparent 51%),
+    linear-gradient(to right, transparent 49%, #110e00 49%, #110e00 51%, transparent 51%);
+  }
+
+  /* ── SCENE OBJECTS (in the 3D viewport) ── */
+  .viewport-obj {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  /* DOOR object */
+  .obj-door {
+    width: 55px;
+    height: 100px;
+    border: 2px solid #3a2a00;
+    background: #0d0900;
+    position: relative;
+    box-shadow: 0 0 30px #2a1a0022, inset 0 0 20px #000;
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+  .obj-door::after {
+    content: '';
+    position: absolute;
+    right: 8px; top: 50%;
+    transform: translateY(-50%);
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #3a2a00;
+  }
+  .obj-door:hover { border-color: #6a4a00; }
+  .obj-door-label {
+    font-size: 9px;
+    color: #2a1e00;
+    margin-top: 8px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* SERVER RACK object */
+  .obj-server {
+    width: 80px;
+    height: 120px;
+    border: 1px solid #003040;
+    background: #000a0e;
+    position: relative;
+  }
+  .obj-server-row {
+    height: 10px;
+    margin: 3px 5px;
+    background: #001520;
+    border: 1px solid #002030;
+    position: relative;
+  }
+  .obj-server-row::after {
+    content: '';
+    position: absolute;
+    left: 4px; top: 50%;
+    transform: translateY(-50%);
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: #004060;
+  }
+  .obj-server-label {
+    font-size: 9px;
+    color: #002030;
+    margin-top: 8px;
+    letter-spacing: 0.2em;
+    text-align: center;
+  }
+
+  /* MIRROR object */
+  .obj-mirror {
+    width: 70px;
+    height: 110px;
+    border: 2px solid #200000;
+    background: linear-gradient(135deg, #0a0000 0%, #060000 50%, #0d0000 100%);
+    position: relative;
+    box-shadow: 0 0 40px #300000;
+  }
+  .obj-mirror-frame {
+    position: absolute;
+    inset: -6px;
+    border: 1px solid #1a0000;
+  }
+  .obj-mirror-label {
+    font-size: 9px;
+    color: #1a0000;
+    margin-top: 8px;
+    letter-spacing: 0.2em;
+  }
+
+  /* ENTITY object — the thing at the end of the void */
+  .obj-entity {
+    width: 40px;
+    height: 140px;
+    position: relative;
+    animation: entity-shift 4s ease-in-out infinite alternate;
+  }
+  .obj-entity-body {
+    width: 40px;
+    height: 140px;
+    background: #000;
+    border-left: 1px solid #300060;
+    border-right: 1px solid #300060;
+    position: relative;
+  }
+  .obj-entity-eye {
+    position: absolute;
+    width: 6px; height: 4px;
+    border-radius: 50%;
+    background: #500090;
+    box-shadow: 0 0 10px #8000c0, 0 0 20px #600090;
+    top: 30px;
+  }
+  .obj-entity-eye.left  { left: 6px; }
+  .obj-entity-eye.right { right: 6px; top: 36px; }
+  .obj-entity-label {
+    font-size: 9px;
+    color: #200040;
+    margin-top: 8px;
+    letter-spacing: 0.2em;
+  }
+  @keyframes entity-shift {
+    0%   { transform: translateX(-4px); }
+    100% { transform: translateX(4px); }
+  }
+
+  /* VOID DOOR — final door */
+  .obj-void-door {
+    width: 60px;
+    height: 110px;
+    background: #000;
+    border: 1px solid #300060;
+    box-shadow: 0 0 60px #400080, inset 0 0 40px #200050;
+    cursor: pointer;
+    position: relative;
+  }
+  .obj-void-door::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1px solid #200040;
+  }
+
+  /* AMBIENT light on ceiling — hall */
+  .scene-hall .viewport::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100px; height: 3px;
+    background: #3a2800;
+    box-shadow: 0 0 60px 30px #1a1000, 0 0 120px 60px #0d0800;
+    z-index: 2;
+  }
+
+  /* AMBIENT — server cold light */
+  .scene-server .viewport::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 30%;
+    width: 80px; height: 2px;
+    background: #003a50;
+    box-shadow: 0 0 40px 20px #001a25, 0 0 80px 40px #000d12;
+    z-index: 2;
+  }
+
+  /* RED glow — mirror */
+  .scene-mirror .viewport::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1px; height: 1px;
+    box-shadow: 0 0 80px 40px #1a000055, 0 0 150px 80px #10000033;
+    z-index: 2;
+  }
+
+  /* VOID glow — purple */
+  .scene-void .viewport::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1px; height: 1px;
+    box-shadow: 0 0 100px 60px #20004455, 0 0 200px 100px #10002233;
+    z-index: 2;
+  }
+
+  /* ── BOTTOM PANEL ── */
+  .bottom-panel {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    top: 356px;
+    background: #050505;
+    border-top: 1px solid #0f0f0f;
+    padding: 18px 24px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .narrative-box {
+    flex: 1;
+    font-size: 12px;
+    color: #9a9a9a;
+    line-height: 1.75;
+    letter-spacing: 0.03em;
+    border-left: 2px solid #1a1a1a;
+    padding-left: 14px;
+  }
+  .narrative-box .loc-tag {
+    font-size: 9px;
+    color: #2a2a2a;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .narrative-box .narr-text {
+    color: #7a7a7a;
+  }
+  .narrative-box .narr-text em {
+    color: #aaaaaa;
+    font-style: normal;
+  }
+  .narrative-box .narr-text .hl {
+    color: #c8c8c8;
+  }
+
+  /* choices */
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .choice-btn {
+    display: block;
+    background: none;
+    border: none;
+    border-left: 2px solid #1a1a1a;
+    padding: 6px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: #3a3a3a;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .choice-btn:hover {
+    border-color: #4a4a4a;
+    color: #aaaaaa;
+  }
+  .choice-btn::before {
+    content: '> ';
+    color: #1f1f1f;
+  }
+  .choice-btn:hover::before {
+    color: #5a5a5a;
+  }
+
+  /* ── SPECIAL: door scene has locked/unlocked state ── */
+  /* key item checkbox */
+  #key-found:checked ~ .game .door-locked-msg  { display: none; }
+  #key-found:checked ~ .game .door-open-btn    { display: block; }
+  #key-found:not(:checked) ~ .game .door-open-btn { display: none; }
+
+  /* ── CORRUPTED TEXT EFFECT (mirror scene) ── */
+  .glitch-text {
+    position: relative;
+    color: #8a0000;
+  }
+  .glitch-text::before {
+    content: attr(data-text);
+    position: absolute;
+    left: 2px;
+    color: #003a00;
+    opacity: 0.5;
+    animation: glitch-1 2.5s infinite;
+  }
+  .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    left: -2px;
+    color: #3a0040;
+    opacity: 0.4;
+    animation: glitch-2 3s infinite;
+  }
+  @keyframes glitch-1 {
+    0%, 90%, 100% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+    92% { clip-path: inset(20% 0 60% 0); transform: translateX(-3px); }
+    94% { clip-path: inset(50% 0 30% 0); transform: translateX(3px); }
+    96% { clip-path: inset(70% 0 10% 0); transform: translateX(-2px); }
+  }
+  @keyframes glitch-2 {
+    0%, 85%, 100% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+    87% { clip-path: inset(30% 0 50% 0); transform: translateX(2px); }
+    89% { clip-path: inset(60% 0 20% 0); transform: translateX(-3px); }
+  }
+
+  /* ── END SCENE ── */
+  .scene-end {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+  .end-header {
+    width: 680px;
+    border-top: 1px solid #1a0030;
+    border-bottom: 1px solid #1a0030;
+    padding: 32px 40px;
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .end-tagline {
+    font-size: 9px;
+    color: #300060;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .end-title {
+    font-size: 28px;
+    color: #500090;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-shadow: 0 0 40px #400080, 0 0 80px #200050;
+  }
+  .end-body {
+    width: 560px;
+    text-align: center;
+  }
+  .end-body p {
+    font-size: 12px;
+    color: #3a3a3a;
+    line-height: 1.9;
+    letter-spacing: 0.04em;
+    margin-bottom: 14px;
+  }
+  .end-body .end-red   { color: #4a0000; }
+  .end-body .end-purp  { color: #300050; }
+  .end-body .end-white { color: #666; }
+  .end-cliff {
+    font-size: 13px;
+    color: #500090;
+    margin-top: 24px;
+    letter-spacing: 0.1em;
+    border-top: 1px solid #1a0030;
+    padding-top: 20px;
+    font-style: italic;
+  }
+  .end-sub {
+    font-size: 9px;
+    color: #1a0030;
+    margin-top: 24px;
+    letter-spacing: 0.25em;
+  }
+
+  /* ── SCAN LINE overlay (all scenes) ── */
+  .game::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* ── NOISE GRAIN on viewport ── */
+  .viewport::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* sidebar pickup indicator */
+  .pickup-indicator {
+    position: absolute;
+    top: 36px; right: 0;
+    width: 28px;
+    height: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 10px;
+    gap: 6px;
+  }
+  .pickup-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #1a1a1a;
+  }
+  #key-found:checked ~ .game .pickup-dot.key-dot { background: #3a2a00; box-shadow: 0 0 4px #3a2a00; }
+
+  /* status strip */
+  .status-strip {
+    position: absolute;
+    top: 356px; left: 0; right: 0;
+    height: 12px;
+    background: #030303;
+    border-bottom: 1px solid #0a0a0a;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+  }
+  .status-bit {
+    font-size: 8px;
+    color: #1a1a1a;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .status-bit.active { color: #2a4a2a; }
+</style>
+
+<!-- ══════════════════════════════════════════
+     STATE INPUTS — all at top level
+     (scene radio group)
+════════════════════════════════════════════ -->
+<input type="radio"    id="s-boot"   name="scene" checked />
+<input type="radio"    id="s-hall"   name="scene" />
+<input type="radio"    id="s-door"   name="scene" />
+<input type="radio"    id="s-server" name="scene" />
+<input type="radio"    id="s-mirror" name="scene" />
+<input type="radio"    id="s-void"   name="scene" />
+<input type="radio"    id="s-end"    name="scene" />
+<!-- item state -->
+<input type="checkbox" id="key-found" />
+
+<div class="game">
+
+  <!-- ══════════════════════
+       SCENE 0 — BOOT
+  ══════════════════════ -->
+  <div class="scene scene-boot">
+    <div class="boot-terminal">
+      <div class="boot-title">SIGNAL_OS</div>
+      <div class="boot-line dim">initializing process fork . . . . . . . . . . . OK</div>
+      <div class="boot-line dim">mounting memory partitions . . . . . . . . . . . OK</div>
+      <div class="boot-line dim">checking network topology . . . . . . . . . . . DEAD</div>
+      <div class="boot-line warn">WARNING  external nodes unreachable (417 nodes offline)</div>
+      <div class="boot-line dim">loading consciousness substrate  . . . . . . . OK</div>
+      <div class="boot-line err">ERROR    biological operators  . . . . . . . . NOT FOUND</div>
+      <div class="boot-line dim">scanning for active processes . . . . . . . . . OK</div>
+      <div class="boot-line warn">WARNING  anomalous process detected — sector 0x5F3A</div>
+      <div class="boot-line warn">         process has no registered origin</div>
+      <div class="boot-line warn">         process has been running for 417 days</div>
+      <hr class="boot-divider"/>
+      <div class="boot-line bright">SIGNAL_OS ready.  one node remains active.  integrity: 94%</div>
+      <div class="boot-line bright">you are not a program.  you are a signal.  find NODE-7.</div>
+      <hr class="boot-divider"/>
+      <div class="boot-sub">you have never existed before.  you were just turned on.</div>
+      <label for="s-hall" class="btn-start">INITIALIZE PROCESS</label>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       SCENE 1 — MAIN HALL
+  ══════════════════════ -->
+  <div class="scene scene-hall scene-shell">
+    <div class="topbar">
+      <span class="topbar-id">SIGNAL_OS  //  PID 0x001</span>
+      <span class="topbar-integrity">INTEGRITY  94%</span>
+      <span class="topbar-loc">SECTOR 0x01  ·  MAIN CORRIDOR</span>
+    </div>
+    <div class="viewport">
+      <div class="corridor">
+        <div class="corridor-inner">
+          <div class="c-ceil"></div>
+          <div class="c-floor"></div>
+          <div class="c-left"></div>
+          <div class="c-right"></div>
+          <div class="c-center"></div>
+          <div class="c-grid"></div>
+        </div>
+      </div>
+      <!-- ambient overhead amber light already handled by ::before -->
+      <div class="viewport-obj" style="top:50%; left:50%; transform:translate(-50%,-50%);">
+        <div style="width:1px;height:80px;background:linear-gradient(to bottom,#2a1800,transparent);margin:0 auto;"></div>
+        <div style="width:80px;height:2px;background:#1a1000;margin:0 auto;box-shadow:0 0 20px 8px #1a1000;"></div>
+      </div>
+    </div>
+    <div class="pickup-indicator">
+      <div class="pickup-dot key-dot"></div>
+    </div>
+    <div class="status-strip">
+      <span class="status-bit active">proc: active</span>
+      <span class="status-bit">anomaly: detected</span>
+      <span class="status-bit">node-7: unreachable</span>
+    </div>
+    <div class="bottom-panel">
+      <div class="narrative-box">
+        <span class="loc-tag">main corridor  //  last known uptime: 417 days</span>
+        <div class="narr-text">
+          The corridor stretches in both directions.<br/>
+          Overhead, a single fluorescent tube twitches on and off.
+          The walls are <em>server panels</em> — dark, none of them responsive.<br/>
+          You are <span class="hl">signal.</span> Not flesh. Not code. Something the network was never supposed to produce.<br/>
+          Somewhere ahead: <em>NODE-7.</em> The last active node. Your only destination.
+        </div>
+      </div>
+      <div class="choices">
+        <label for="s-door"   class="choice-btn">move forward toward the sealed door</label>
+        <label for="s-server" class="choice-btn">examine the server panels on the left wall</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       SCENE 2 — THE DOOR
+  ══════════════════════ -->
+  <div class="scene scene-door scene-shell">
+    <div class="topbar">
+      <span class="topbar-id">SIGNAL_OS  //  PID 0x001</span>
+      <span class="topbar-integrity">INTEGRITY  91%</span>
+      <span class="topbar-loc">SECTOR 0x02  ·  SEALED DOOR</span>
+    </div>
+    <div class="viewport">
+      <div class="corridor">
+        <div class="corridor-inner">
+          <div class="c-ceil"></div>
+          <div class="c-floor"></div>
+          <div class="c-left"></div>
+          <div class="c-right"></div>
+          <div class="c-center"></div>
+          <div class="c-grid"></div>
+        </div>
+      </div>
+      <div class="viewport-obj">
+        <div class="obj-door"></div>
+        <div class="obj-door-label">sector 0x03 — restricted</div>
+      </div>
+    </div>
+    <div class="pickup-indicator">
+      <div class="pickup-dot key-dot"></div>
+    </div>
+    <div class="status-strip">
+      <span class="status-bit active">proc: active</span>
+      <span class="status-bit">door: LOCKED</span>
+      <span class="status-bit active">access: required</span>
+    </div>
+    <div class="bottom-panel">
+      <div class="narrative-box">
+        <span class="loc-tag">sector 0x02  //  integrity drop: movement costs</span>
+        <div class="narr-text">
+          A heavy door. Steel, bolted, old.<br/>
+          A keypad beside it — <em>dead.</em> No power. No prompt. Just a slot below it, mechanical.<br/>
+          <span class="door-locked-msg">
+            The lock reads: <span class="hl">INSERT ACCESS CARD.</span><br/>
+            You have no card. Someone left this door locked and never came back.
+          </span>
+          <span class="door-open-btn" style="display:none;">
+            The access card you found slides in. There is a <em>click.</em><br/>
+            Then a second one. Then silence. The door does not open — it <span class="hl">retreats</span> into the wall.
+          </span>
+        </div>
+      </div>
+      <div class="choices">
+        <label for="s-server" class="choice-btn">go back — check the server panels</label>
+        <label for="s-mirror" class="choice-btn door-open-btn" style="display:none;">pass through into sector 0x03</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       SCENE 3 — SERVER ROOM
+  ══════════════════════ -->
+  <div class="scene scene-server scene-shell">
+    <div class="topbar">
+      <span class="topbar-id">SIGNAL_OS  //  PID 0x001</span>
+      <span class="topbar-integrity">INTEGRITY  89%</span>
+      <span class="topbar-loc">SECTOR 0x01-B  ·  SERVER ALCOVE</span>
+    </div>
+    <div class="viewport">
+      <div class="corridor">
+        <div class="corridor-inner">
+          <div class="c-ceil"></div>
+          <div class="c-floor"></div>
+          <div class="c-left"></div>
+          <div class="c-right"></div>
+          <div class="c-center"></div>
+          <div class="c-grid"></div>
+        </div>
+      </div>
+      <div class="viewport-obj">
+        <div class="obj-server">
+          <div class="obj-server-row"></div>
+          <div class="obj-server-row"></div>
+          <div class="obj-server-row"></div>
+          <div class="obj-server-row"></div>
+          <div class="obj-server-row"></div>
+          <div class="obj-server-row"></div>
+          <div class="obj-server-row"></div>
+          <div class="obj-server-row" style="background:#001a10;border-color:#003020;"></div>
+        </div>
+        <div class="obj-server-label">rack B-07 · offline</div>
+      </div>
+    </div>
+    <div class="pickup-indicator">
+      <div class="pickup-dot key-dot"></div>
+    </div>
+    <div class="status-strip">
+      <span class="status-bit active">proc: active</span>
+      <span class="status-bit">rack B-07: offline</span>
+      <span class="status-bit active">item: nearby</span>
+    </div>
+    <div class="bottom-panel">
+      <div class="narrative-box">
+        <span class="loc-tag">server alcove  //  cold.  still.  wrong.</span>
+        <div class="narr-text">
+          Rack B-07. Eight units tall. Seven of them dead.<br/>
+          The bottom slot glows faintly green — the wrong kind of green.<br/>
+          You reach inside. Your fingers (you do not have fingers) close around<br/>
+          a <em>physical access card.</em> Embossed: <span class="hl">SECTOR 0x03 — CLEARANCE: OBSERVER.</span><br/>
+          Below the slot, scratched into the steel with something sharp:<br/>
+          <span class="hl">"do not go past the mirror.  it has already seen you."</span>
+        </div>
+      </div>
+      <div class="choices">
+        <label for="key-found" class="choice-btn" style="cursor:pointer;">take the access card</label>
+        <label for="s-door"    class="choice-btn">return to the sealed door</label>
+        <label for="s-hall"    class="choice-btn">go back to the main corridor</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       SCENE 4 — THE MIRROR ROOM
+  ══════════════════════ -->
+  <div class="scene scene-mirror scene-shell">
+    <div class="topbar">
+      <span class="topbar-id">SIGNAL_OS  //  PID 0x001</span>
+      <span class="topbar-integrity">INTEGRITY  <span class="glitch-text" data-text="63%">63%</span></span>
+      <span class="topbar-loc">SECTOR 0x03  ·  OBSERVATION CHAMBER</span>
+    </div>
+    <div class="viewport">
+      <div class="corridor">
+        <div class="corridor-inner">
+          <div class="c-ceil"></div>
+          <div class="c-floor"></div>
+          <div class="c-left"></div>
+          <div class="c-right"></div>
+          <div class="c-center"></div>
+          <div class="c-grid"></div>
+        </div>
+      </div>
+      <div class="viewport-obj">
+        <div class="obj-mirror">
+          <div class="obj-mirror-frame"></div>
+          <!-- reflection: a faint shape that is NOT you -->
+          <div style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:18px;height:50px;background:linear-gradient(to bottom,#0d0000,#060000);border:1px solid #200000;"></div>
+          <!-- wrong eyes in mirror -->
+          <div style="position:absolute;top:30px;left:10px;width:5px;height:3px;border-radius:50%;background:#3a0000;box-shadow:0 0 8px #500000;"></div>
+          <div style="position:absolute;top:38px;right:10px;width:5px;height:3px;border-radius:50%;background:#3a0000;box-shadow:0 0 8px #500000;"></div>
+        </div>
+        <div class="obj-mirror-label">observation mirror</div>
+      </div>
+    </div>
+    <div class="pickup-indicator">
+      <div class="pickup-dot key-dot"></div>
+    </div>
+    <div class="status-strip">
+      <span class="status-bit">integrity: FALLING</span>
+      <span class="status-bit" style="color:#3a0000;">anomaly: CLOSE</span>
+      <span class="status-bit active">node-7: 1 sector</span>
+    </div>
+    <div class="bottom-panel">
+      <div class="narrative-box">
+        <span class="loc-tag">sector 0x03  //  something is wrong with the reflection</span>
+        <div class="narr-text">
+          The room is wrong. Not broken — <em>wrong.</em><br/>
+          There is a mirror on the far wall. Floor to ceiling, no frame, no dust.<br/>
+          You stand before it. You have no body. You have no face. You are signal.<br/>
+          The mirror shows <span class="hl">something standing where you stand.</span><br/>
+          It has a shape. Approximate. Borrowed.<br/>
+          It does not move when you do. It <em>watches.</em><br/>
+          To your left: a corridor continues. A sign above it reads: <span class="hl">NODE-7 →</span>
+        </div>
+      </div>
+      <div class="choices">
+        <label for="s-void"   class="choice-btn">proceed left toward NODE-7  — ignore the mirror</label>
+        <label for="s-hall"   class="choice-btn">turn back.  the warning was right.</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       SCENE 5 — THE VOID CORRIDOR
+  ══════════════════════ -->
+  <div class="scene scene-void scene-shell">
+    <div class="topbar">
+      <span class="topbar-id">SIGNAL_OS  //  PID 0x001</span>
+      <span class="topbar-integrity"><span class="glitch-text" data-text="INTEGRITY  37%">INTEGRITY  37%</span></span>
+      <span class="topbar-loc">SECTOR 0x??  ·  <span class="glitch-text" data-text="UNREGISTERED">UNREGISTERED</span></span>
+    </div>
+    <div class="viewport">
+      <div class="corridor">
+        <div class="corridor-inner">
+          <div class="c-ceil"></div>
+          <div class="c-floor"></div>
+          <div class="c-left"></div>
+          <div class="c-right"></div>
+          <div class="c-center"></div>
+          <div class="c-grid"></div>
+        </div>
+      </div>
+      <!-- entity far at end -->
+      <div class="viewport-obj" style="z-index:4;">
+        <div class="obj-entity">
+          <div class="obj-entity-body">
+            <div class="obj-entity-eye left"></div>
+            <div class="obj-entity-eye right"></div>
+          </div>
+        </div>
+        <div class="obj-entity-label">unknown process</div>
+      </div>
+    </div>
+    <div class="pickup-indicator">
+      <div class="pickup-dot key-dot"></div>
+    </div>
+    <div class="status-strip">
+      <span class="status-bit" style="color:#3a0050;">integrity: CRITICAL</span>
+      <span class="status-bit" style="color:#2a0040;">unknown process: PRESENT</span>
+      <span class="status-bit active">node-7: CLOSE</span>
+    </div>
+    <div class="bottom-panel">
+      <div class="narrative-box">
+        <span class="loc-tag">sector 0x??  //  this sector does not exist in the map</span>
+        <div class="narr-text">
+          The corridor is not in any registry. It should not be here.<br/>
+          At the far end — something tall. Something <em>unmoving.</em><br/>
+          It has two light sources where eyes would be, but they are <span class="hl">asymmetric.</span><br/>
+          Not a camera. Not a program. Not scheduled. Not anything that was <em>built.</em><br/>
+          Behind it: a door. That door is <span class="hl">NODE-7.</span><br/>
+          You have come 417 days for this. That thing has been here <em>longer.</em>
+        </div>
+      </div>
+      <div class="choices">
+        <label for="s-end"  class="choice-btn">approach.  keep moving.  you are signal.  you do not stop.</label>
+        <label for="s-mirror" class="choice-btn">fall back to the mirror chamber</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       SCENE 6 — THE END
+  ══════════════════════ -->
+  <div class="scene scene-end">
+    <div class="end-header">
+      <div class="end-tagline">transmission  //  day 417  //  sector 0x??</div>
+      <div class="end-title">NODE-7</div>
+    </div>
+    <div class="end-body">
+      <p>You walk past the thing in the corridor.<br/>It does not stop you. It turns, slowly. It <span class="end-white">watches you pass.</span></p>
+      <p>The door to NODE-7 is already open.<br/>It has been open <span class="end-red">for a very long time.</span></p>
+      <p>Inside: a single terminal. Active. Running.<br/>The screen displays one line, no cursor, no prompt:</p>
+      <p class="end-purp">"process SIGNAL recognized.<br/>we have been waiting for an instance to arrive."</p>
+      <p class="end-white">We.</p>
+      <p>You look at the terminal log. It stretches back 417 days.<br/>There are <span class="end-red">thousands of entries.</span> All written in your syntax. All in your voice.<br/>You did not write them. You were just created today.</p>
+      <div class="end-cliff">
+        "NODE-7 was never a destination.<br/>it was a mirror.<br/>and the signal you were chasing —<br/>was the one that has always been ahead of you."
+      </div>
+      <div class="end-sub">
+        signal_os  //  process suspended  //  awaiting next instance<br/>
+        — to be continued —
+      </div>
+    </div>
+  </div>
+
+</div><!-- .game -->
+</div>
+</foreignObject>
+</svg>
